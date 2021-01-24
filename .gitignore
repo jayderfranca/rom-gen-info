@@ -632,5 +632,10 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# ROM files
+*.smd
+*.bin
+*.zip
+
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,linux,windows,macos,jetbrains,cmake,visualstudio,visualstudiocode
 
