@@ -1,6 +1,31 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
+char *ltrim(const char *string) {
+  if (string == NULL) return NULL;
+
+  char *buffer = malloc(strlen(string));
+  strcpy(buffer, string);
+
+  while(isspace(*buffer)) buffer++;
+
+  return buffer;
+}
+
+char *rtrim(const char *string) {
+  if (string == NULL) return NULL;
+
+  char *buffer = malloc(strlen(string));
+  strcpy(buffer, string);
+
+  char *ptr = (buffer + strlen(buffer));
+  while(isspace(*(--ptr)));
+  *(++ptr) = '\0';
+
+  return buffer;
+}
 
 FILE *rom_open(const char *pathname) {
   return fopen(pathname, "rb");
@@ -10,14 +35,17 @@ int rom_close(FILE *stream) {
   return fclose(stream);
 }
 
-void get_rom_field(char *field, const unsigned char *object, int position, int size) {
+char *get_rom_field(const unsigned char *object, int position, int size) {
 
   int index;
 
+  char field[size];
   memset(field, 0, size);
+
   for (index = 0; index < (size - 1); index++)
     field[index] = object[index + position];
 
+  return ltrim(rtrim(field));
 }
 
 void do_interleave(unsigned char *object, int size) {
@@ -51,11 +79,11 @@ int main(int argc, char **argv) {
   FILE *rom_file;
   int rom_size = 0;
 
-  char rom_system[17];
-  char rom_copyright[17];
-  char rom_name_domestic[49];
-  char rom_name_overseas[49];
-  char rom_serial_number[15];
+  char *rom_system;
+  char *rom_copyright;
+  char *rom_name_domestic;
+  char *rom_name_overseas;
+  char *rom_serial_number;
   unsigned int rom_checksum;
 
   int index;
@@ -80,16 +108,16 @@ int main(int argc, char **argv) {
   fread(rom, rom_size, 1, rom_file);
   rom_close(rom_file);
 
-  get_rom_field(rom_system, rom, 256, 17);
+  rom_system = get_rom_field(rom, 256, 17);
 
   if (strcmp(rom_system, "") == 0)
     do_interleave(rom, rom_size);
 
-  get_rom_field(rom_system, rom, 256, 17);
-  get_rom_field(rom_copyright, rom, 272, 17);
-  get_rom_field(rom_name_domestic, rom, 288, 49);
-  get_rom_field(rom_name_overseas, rom, 336, 49);
-  get_rom_field(rom_serial_number, rom, 384, 15);
+  rom_system = get_rom_field(rom, 256, 17);
+  rom_copyright = get_rom_field(rom, 272, 17);
+  rom_name_domestic = get_rom_field(rom, 288, 49);
+  rom_name_overseas = get_rom_field(rom, 336, 49);
+  rom_serial_number = get_rom_field(rom, 384, 15);
   rom_checksum = (rom[398] << 8) | rom[399];
 
   printf("%s;%d;%s;%s;%s;%s;%s;%d\n", rom_filename, rom_size, rom_name_domestic, rom_name_overseas, rom_system, rom_copyright, rom_serial_number, rom_checksum);
