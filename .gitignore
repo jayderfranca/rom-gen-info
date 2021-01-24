@@ -637,5 +637,8 @@ MigrationBackup/
 *.bin
 *.zip
 
+# executable file
+rom-gen-info
+
 # End of https://www.toptal.com/developers/gitignore/api/c,c++,linux,windows,macos,jetbrains,cmake,visualstudio,visualstudiocode
 
